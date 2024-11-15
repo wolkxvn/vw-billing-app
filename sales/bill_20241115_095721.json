@@ -1,0 +1,21 @@
+{
+    "items": {
+        "4": {
+            "name": "Naan",
+            "price": 40,
+            "quantity": 1
+        },
+        "5": {
+            "name": "Biryani",
+            "price": 300,
+            "quantity": 1
+        },
+        "9": {
+            "name": "Veg Spring Roll",
+            "price": 160,
+            "quantity": 1
+        }
+    },
+    "total": 500,
+    "timestamp": "2024-11-15T04:27:21.134Z"
+}

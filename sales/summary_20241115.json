@@ -1,0 +1,30 @@
+{
+    "total_sales": 1320,
+    "total_bills": 2,
+    "items_sold": {
+        "Naan": {
+            "quantity": 1,
+            "revenue": 40
+        },
+        "Biryani": {
+            "quantity": 1,
+            "revenue": 300
+        },
+        "Veg Spring Roll": {
+            "quantity": 1,
+            "revenue": 160
+        },
+        "Butter Chicken": {
+            "quantity": 1,
+            "revenue": 320
+        },
+        "Paneer Tikka": {
+            "quantity": 1,
+            "revenue": 280
+        },
+        "Dal Makhani": {
+            "quantity": 1,
+            "revenue": 220
+        }
+    }
+}

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Restaurant Billing System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .menu-items, .bill-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+
+        /* Specific mobile styling */
+        @media (max-width: 767px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                gap: 10px;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            .menu-item {
+                padding: 8px !important;
+            }
+
+            .menu-item h3 {
+                font-size: 0.85rem !important;
+            }
+
+            .bill-section {
+                order: -1;
+            }
+
+            .bill-table {
+                font-size: 0.8rem !important;
+            }
+
+            .total-section h3 {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+            .menu-items {
+                flex: 2;
+            }
+            .bill-section {
+                flex: 1;
+                position: sticky;
+                top: 10px;
+                max-height: calc(100vh - 20px);
+                overflow-y: auto;
+            }
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .menu-item {
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            touch-action: manipulation;
+            background-color: #fff;
+        }
+
+        .menu-item:active {
+            background-color: #e0e0e0;
+            transform: scale(0.98);
+        }
+
+        .menu-item h3 {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .menu-item p {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .search-container {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 10px 0;
+            margin-bottom: 15px;
+            z-index: 100;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-box:focus {
+            border-color: #4CAF50;
+        }
+
+        .bill-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .bill-table th, .bill-table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .remove-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .total-section {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 2px solid #ddd;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            touch-action: manipulation;
+            width: 100%;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.new-bill {
+            background-color: #2196F3;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quantity-btn {
+            background: #eee;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            display: none;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Highlight matching text in search results */
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 0 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="menu-items">
+            <h2>Menu Items</h2>
+            <div class="search-container">
+                <input type="text" class="search-box" id="searchBox" placeholder="Search menu items...">
+            </div>
+            <div class="menu-grid" id="menuGrid"></div>
+            <div id="noResults" class="no-results" style="display: none;">
+                No matching items found
+            </div>
+        </div>
+        <div class="bill-section">
+            <h2>Current Bill</h2>
+            <table class="bill-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="billItems"></tbody>
+            </table>
+            <div class="total-section">
+                <h3>Total Amount: ₹<span id="totalAmount">0.00</span></h3>
+            </div>
+            <div class="button-group">
+                <button onclick="saveBill()">Save Bill</button>
+                <button onclick="newBill()" class="new-bill">New Bill</button>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const menuItems = [
+            { id: 1, name: "Butter Chicken", price: 320 },
+            { id: 2, name: "Paneer Tikka", price: 280 },
+            { id: 3, name: "Dal Makhani", price: 220 },
+            { id: 4, name: "Naan", price: 40 },
+            { id: 5, name: "Biryani", price: 300 },
+            { id: 6, name: "Jeera Rice", price: 180 },
+            { id: 7, name: "Malai Kofta", price: 260 },
+            { id: 8, name: "Palak Paneer", price: 240 },
+            { id: 9, name: "Veg Spring Roll", price: 160 },
+            { id: 10, name: "Manchurian", price: 200 },
+            { id: 11, name: "Masala Dosa", price: 120 },
+            { id: 12, name: "Idli Sambar", price: 100 },
+            { id: 13, name: "Gulab Jamun", price: 60 },
+            { id: 14, name: "Rasgulla", price: 50 },
+            { id: 15, name: "Lassi", price: 80 }
+        ];
+
+        let currentBill = {};
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2000);
+        }
+
+        function highlightText(text, searchTerm) {
+            if (!searchTerm) return text;
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        function displayMenuItems(searchTerm = '') {
+            const menuGrid = document.getElementById('menuGrid');
+            const noResults = document.getElementById('noResults');
+            const filteredItems = menuItems.filter(item => 
+                item.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            if (filteredItems.length === 0) {
+                menuGrid.innerHTML = '';
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+                menuGrid.innerHTML = filteredItems.map(item => `
+                    <div class="menu-item" onclick="addToBill(${item.id})">
+                        <h3>${highlightText(item.name, searchTerm)}</h3>
+                        <p>₹${item.price.toFixed(2)}</p>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function addToBill(itemId) {
+            const item = menuItems.find(i => i.id === itemId);
+            if (currentBill[itemId]) {
+                currentBill[itemId].quantity += 1;
+            } else {
+                currentBill[itemId] = {
+                    name: item.name,
+                    price: item.price,
+                    quantity: 1
+                };
+            }
+            updateBillDisplay();
+            showToast(`Added ${item.name}`);
+        }
+
+        function removeFromBill(itemId) {
+            delete currentBill[itemId];
+            updateBillDisplay();
+            const item = menuItems.find(i => i.id === itemId);
+            showToast(`Removed ${item.name}`);
+        }
+
+        function updateQuantity(itemId, delta) {
+            if (currentBill[itemId]) {
+                const newQuantity = currentBill[itemId].quantity + delta;
+                if (newQuantity > 0) {
+                    currentBill[itemId].quantity = newQuantity;
+                } else {
+                    delete currentBill[itemId];
+                }
+                updateBillDisplay();
+            }
+        }
+
+        function updateBillDisplay() {
+            const billItems = document.getElementById('billItems');
+            const totalAmount = document.getElementById('totalAmount');
+            
+            let total = 0;
+            billItems.innerHTML = Object.entries(currentBill).map(([id, item]) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                return `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>
+                            <div class="quantity-control">
+                                <button class="quantity-btn" onclick="event.stopPropagation(); updateQuantity(${id}, -1)">-</button>
+                                ${item.quantity}
+                                <button class="quantity-btn" onclick="event.stopPropagation(); updateQuantity(${id}, 1)">+</button>
+                            </div>
+                        </td>
+                        <td>₹${item.price.toFixed(2)}</td>
+                        <td>₹${itemTotal.toFixed(2)}</td>
+                        <td>
+                            <button class="remove-btn" onclick="event.stopPropagation(); removeFromBill(${id})">×</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            totalAmount.textContent = total.toFixed(2);
+        }
+
+        function saveBill() {
+            if (Object.keys(currentBill).length === 0) {
+                showToast('Add items to bill first');
+                return;
+            }
+
+            const billData = {
+                items: currentBill,
+                total: parseFloat(document.getElementById('totalAmount').textContent),
+                timestamp: new Date().toISOString()
+            };
+
+            fetch('/save_bill', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(billData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showToast('Bill saved successfully!');
+                newBill();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error saving bill');
+            });
+        }
+
+        function newBill() {
+            currentBill = {};
+            updateBillDisplay();
+            showToast('New bill started');
+        }
+
+        // Initialize the menu when page loads
+        displayMenuItems();
+
+        // Add search functionality with debounce
+        let searchTimeout;
+        document.getElementById('searchBox').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                displayMenuItems(e.target.value);
+            }, 300); // Debounce search for better performance
+        });
+
+        // Prevent zoom on input focus for iOS
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>

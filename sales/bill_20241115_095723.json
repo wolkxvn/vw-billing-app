@@ -1,0 +1,21 @@
+{
+    "items": {
+        "1": {
+            "name": "Butter Chicken",
+            "price": 320,
+            "quantity": 1
+        },
+        "2": {
+            "name": "Paneer Tikka",
+            "price": 280,
+            "quantity": 1
+        },
+        "3": {
+            "name": "Dal Makhani",
+            "price": 220,
+            "quantity": 1
+        }
+    },
+    "total": 820,
+    "timestamp": "2024-11-15T04:27:23.884Z"
+}
